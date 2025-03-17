@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Daniel Gnoutcheff’s webspace - gpg: WARNING: Tor is not properly configured</title>
+        <link rel="stylesheet" href="../css/default.css" />
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">Daniel Gnoutcheff’s webspace</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+                <a href="../archive/">Archive</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1>gpg: WARNING: Tor is not properly configured</h1>
+            <div class="info">
+    Posted on February  5, 2017
+    
+</div>
+
+<p>Whilst working on another problem, I suddenly discovered that I could no longer interrogate the OpenPGP keyserver network from my Debian stretch workstation:</p>
+<pre><code>gnoutchd@monsey:~$ gpg2 --search-keys gnoutchd@softwarefreedom.org
+gpg: WARNING: Tor is not properly configured
+gpg: error searching keyserver: Permission denied
+gpg: keyserver search failed: Permission denied
+gnoutchd@monsey:~$</code></pre>
+<p>I was rather annoyed to see this, as this was with the default tor configuration that shipped with Debian. (And I know that <a href="https://www.facebook.com/jamesgrimmelmann/posts/10154220384036275">Tor can be</a> <a href="https://arstechnica.com/security/2013/12/use-of-tor-helped-fbi-finger-bomb-hoax-suspect/">an unforgiving beast</a>, so I really didn’t want to mess with my <code>torrc</code>.)</p>
+<p>Fortunately, the problem went away once I cleaned up my GnuPG configuration. Apparently, the problem only happens if I:</p>
+<ol type="1">
+<li>Connect to an IPv6 network,</li>
+<li>put “<code>use-tor</code>” in my <code>~/.gnupg/dirmngr.conf</code>, and</li>
+<li>put “<code>keyserver hkp://pool.sks-keyservers.net</code>” in my <code>~/.gnupg/gpg.conf</code>.</li>
+</ol>
+<p>With GnuPG 2.1, you’re supposed to put <code>keyserver</code> lines into <code>dirmngr.conf</code><a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>, but for backwards compatibility (I presume) with pre-dirmngr GnuPG versions, <code>gpg</code> will still process <code>keyserver</code> lines in <code>gpg.conf</code>. But apparently this feature is buggy, at least when dirmngr is using Tor. Once I moved the keyserver line from <code>gpg.conf</code> to <code>dirmngr.conf</code>, my problem went away.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></p>
+<p>Why does this happen? I haven’t checked, but I’d guess it’s a side-effect of a DNS leak. When <code>gpg</code> processes the <code>keyserver</code> option, it probably does a standard DNS lookup and passes the resolved IP address to <code>dirmngr</code>, which <a href="https://lists.gnupg.org/pipermail/gnupg-devel/2014-December/029213.html">is responsible for keyserver lookups in GnuPG 2.1</a>. In turn, <code>dirmngr</code> passes the IP to Tor, which works as long as it’s an IPv4 address. When I’m on an IPv6 network, the DNS resolver gives me an IPv6 address, and Tor barfs.</p>
+<p>Really, though, <a href="https://www.torproject.org/docs/faq.html.en#WarningsAboutSOCKSandDNSInformationLeaks">you always want to do DNS lookups though Tor</a> if you’re going to contact a host through Tor. <code>dirmngr</code> apparently does the right thing when it gets the keyserver list directly from <code>dirmngr.conf</code>.</p>
+<p>I’m not sure how I ended up with this configuration. Where did this <code>dirmngr.conf</code> come from? It may have been some GnuPG 1.4-to-2.1 migration procedure gone wrong, which would be a meaningful bug. I’ll likely file a bug report if I see this happen again.</p>
+<p>Still, nice to see that GnuPG has proper Tor integration now.</p>
+<p>The relevant log messages, for Google’s sake:</p>
+<p><strong>/var/log/tor/log:</strong></p>
+<pre><code>Feb 05 21:44:51.000 [warn] Refusing to connect to IPv6 address [scrubbed] because Port has NoIPv6Traffic set.</code></pre>
+<p><strong>systemd journal:</strong></p>
+<pre><code>Feb 05 21:44:51 monsey dirmngr[2883]: can't connect to 'keyserver.pch.net': Permission denied
+Feb 05 21:44:51 monsey dirmngr[2883]: error connecting to 'http://keyserver.pch.net:11371': Permission denied
+Feb 05 21:44:51 monsey dirmngr[2883]: (Tor configuration problem)
+Feb 05 21:44:51 monsey dirmngr[2883]: command 'KS_SEARCH' failed: Permission denied</code></pre>
+<section class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>See <code>man gpg</code>’s section on <code>--keyserver</code>.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>Ultimately, I took <code>dirmngr</code> back to a default configuration by replacing my <code>~/.gnupg/dirmngr.conf</code> with a copy of <code>/usr/share/gnupg/dirmngr-conf.skel</code>, the template that GnuPG 2.1 uses when creating a fresh <code>~/.gnupg</code>.<a href="#fnref2" class="footnote-back">↩</a></p></li>
+</ol>
+</section>
+
+        </div>
+    </body>
+</html>

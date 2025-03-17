@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Daniel Gnoutcheff’s webspace - animefreak.tv video extractor</title>
+        <link rel="stylesheet" href="../../css/default.css" />
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../../">Daniel Gnoutcheff’s webspace</a>
+            </div>
+            <div id="navigation">
+                <a href="../../">Home</a>
+                <a href="../../archive/">Archive</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1>animefreak.tv video extractor</h1>
+            <div class="info">
+    Posted on January 11, 2014
+    
+</div>
+
+<p><a href="afextract.py" class="uri">afextract.py</a> (python3 script)</p>
+<p>This quick-and-dirty script can be used to extract direct-download URLs for <em>some</em> of the videos hosted by animefreak.tv (a rather shady anime streaming service). It expects a URL as a command-line argument and, if successful, prints the extracted video URL to stdout. For example:</p>
+<p><code>$ python3 afextract.py 'http://www.animefreak.tv/watch/kotoura-san-episode-1-online' http://st5.anime1.com/Kotoura-san Episode 1.mp4?st=K20WGzQJmkNjgCOQJ9Y4sQ&amp;e=1421012503 $ wget 'http://st5.anime1.com/Kotoura-san Episode 1.mp4?st=K20WGzQJmkNjgCOQJ9Y4sQ&amp;e=1421012503' -O 'Kotoura-san Episode 1.mp4' ...</code></p>
+<p>As of January 2015, it only works on videos served with af.tv’s <code>playernew.swf</code> player. There’s no error handling to speak of, so it’s likely to dump a traceback on you if things don’t go exactly as expected.</p>
+<p>I wrote this script as a small programming/cryptanalysis/web scraping exercise, and I post it on the off-chance that someone finds it useful. A credible next-step might be to wrap this as a <a href="https://yt-dl.org/">youtube-dl</a> extractor, but as of this writing, <a href="https://github.com/rg3/youtube-dl/pull/4554#issuecomment-68642752">youtube-dl’s testing policy</a> requires us to find a video that doesn’t look like copyright infringement, and af.tv generally doesn’t look legal.</p>
+<p><a href="http://creativecommons.org/publicdomain/zero/1.0/"><img src="http://i.creativecommons.org/p/zero/1.0/88x31.png" alt="CC0" /></a><br />
+To the extent possible under law, <a href="http://daniel.gnoutcheff.name/kludge-box/animefreak/"><span data-property="dct:title">Daniel Gnoutcheff</span></a> has waived all copyright and related or neighboring rights to <span data-property="dct:title">Animefreak.tv video extractor</span>. This work is published from: <span data-property="vcard:Country" data-datatype="dct:ISO3166" content="US" data-about="http://daniel.gnoutcheff.name/kludge-box/animefreak/"> United States</span>.</p>
+
+        </div>
+    </body>
+</html>

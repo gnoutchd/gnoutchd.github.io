@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Daniel Gnoutcheff’s webspace - Change-making and currency orderliness</title>
+        <link rel="stylesheet" href="../../css/default.css" />
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../../">Daniel Gnoutcheff’s webspace</a>
+            </div>
+            <div id="navigation">
+                <a href="../../">Home</a>
+                <a href="../../archive/">Archive</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1>Change-making and currency orderliness</h1>
+            <div class="info">
+    Posted on April 20, 2015
+    
+</div>
+
+<p><a href="orderlycur.py" class="uri">orderlycur.py</a> (python3)</p>
+<p>The “change-making problem” asks us to find the optimal way to make change using a some currency, i.e. a way that uses the fewest coins possible to represent a given value. A currency is <em>orderly</em> (a.k.a. <em>canonical</em>, <em>standard</em>, or <em>greedy</em>) if a greedy algorithm can be relied upon to make optimal change.</p>
+<p>Anyone who is building a change-maker for a specific currency may want to test that currently for orderliness. Change-making is NP-hard when we include support for the non-orderly currencies, and since most real-world currencies are orderly, that complexity is usually unnecessary.</p>
+<p>Testing for orderliness is non-trivial, however, and it benefits from computer assistance. As of 2015, the best we have is an O(n<sup>3</sup>) algorithm due to David Pearson. This python module is a quick-and-dirty implementation of that algorithm.</p>
+<p>More info (including citations) are included in the module docstring.</p>
+<h3 id="example-usage">Example usage:</h3>
+<p>Is US coinage orderly?</p>
+<p><code>$ python3 Python 3.4.0 (default, Apr 11 2014, 13:05:11) [GCC 4.8.2] on linux Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information. &gt;&gt;&gt; from orderlycur import * &gt;&gt;&gt; us_coins = [100, 50, 25, 10, 5, 1] &gt;&gt;&gt; is_orderly(us_coins) True</code></p>
+<p>Yes, it is. What about common UK coinage?</p>
+<p><code>&gt;&gt;&gt; uk_coins = [200, 100, 50, 20, 10, 5, 2, 1] &gt;&gt;&gt; is_orderly(uk_coins) True</code></p>
+<p>That currency is orderly too. But what happens when we add the 25p commemorative coin?</p>
+<p><code>&gt;&gt;&gt; uk_coins.insert(3, 25)</code><br />
+<code>&gt;&gt;&gt; uk_coins [200, 100, 50, 25, 20, 10, 5, 2, 1] &gt;&gt;&gt; is_orderly(uk_coins) False</code></p>
+<p>Introducing the 25p coin has killed orderliness. If we like, we can look at the counterexample that Pearson’s algorithm gives us.</p>
+<p><code>&gt;&gt;&gt; counterexample = orderly_counterex(uk_coins) &gt;&gt;&gt; counterexample [(200, 0), (100, 0), (50, 0), (25, 0), (20, 2), (10, 0), (5, 0), (2, 0), (1, 0)] &gt;&gt;&gt; coinrep_value(counterexample) 40 &gt;&gt;&gt; coinrep_count(counterexample) 2 &gt;&gt;&gt; ref = grdy_coinrep(40, uk_coins) &gt;&gt;&gt; ref [(200, 0), (100, 0), (50, 0), (25, 1), (20, 0), (10, 1), (5, 1), (2, 0), (1, 0)] &gt;&gt;&gt; coinrep_value(ref) 40 &gt;&gt;&gt; coinrep_count(ref) 3 &gt;&gt;&gt;</code><br />
+</p>
+<p>The counterexample shows that 40p is optimally represented with 2 coins (2 20p coins, specifically), but the greedy algorithm (<code>grdy_coinrep()</code>) wants to use 3 coins (a 25p, a 10p, and a 5p). The greedy algorithm cannot be trusted to make optimal change here.</p>
+<h3 id="licence">Licence</h3>
+<p><a href="http://creativecommons.org/publicdomain/zero/1.0/"><img src="http://i.creativecommons.org/p/zero/1.0/88x31.png" alt="CC0" /></a><br />
+To the extent possible under law, <span data-resource="[_:publisher]" rel="dct:publisher"> <span data-property="dct:title">Daniel Gnoutcheff</span></span> has waived all copyright and related or neighboring rights to <span data-property="dct:title">orderlycur</span>. This work is published from: <span data-property="vcard:Country" data-datatype="dct:ISO3166" content="US" data-about="[_:publisher]"> United States</span>.</p>
+
+        </div>
+    </body>
+</html>

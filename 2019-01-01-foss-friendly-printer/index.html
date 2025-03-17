@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Daniel Gnoutcheff’s webspace - Finding FOSS-Friendly Printers, or What ThinkPenguin is Good For</title>
+        <link rel="stylesheet" href="../css/default.css" />
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">Daniel Gnoutcheff’s webspace</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+                <a href="../archive/">Archive</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1>Finding FOSS-Friendly Printers, or What ThinkPenguin is Good For</h1>
+            <div class="info">
+    Posted on January  1, 2019
+    
+</div>
+
+<p>Some months ago, <a href="https://lists.debian.org/debian-printing/2018/03/msg00044.html">I needed a new printer/scanner</a> with all-FOSS drivers for <a href="https://softwarefreedom.org/">SFLC</a>, and to my surprise, nobody seemed to know how to find one. Having suceeded after some trial-and-error, I’m here to tell you why <a href="https://www.thinkpenguin.com/catalog/printer-all-one-gnulinux">ThinkPenguin</a> is the right answer.</p>
+<p>I’d known of ThinkPenguin for a while, but I was reluctant to use them at first. We already had a business account with W.B. Mason, a reputable office supply distributor with a wide selection of printers. ThinkPenguin, by contrast, was an obscure and expensive boutique, and their printer catalog seemed constrained and arbitrary. In particular, they had multifunction inkjets but no multifunction lasers, and we wanted the latter. Meanwhile W. B. Mason had plenty of multifunction lasers, and HPLIP <a href="https://developers.hp.com/hp-linux-imaging-and-printing/supported_devices/index">claimed to support them</a> without any proprietary bits. It seemed to us that the distributor we already knew and liked could get us a better printer – and at a lower price, too.</p>
+<p>It was not until we tested our first printer that we discovered the problem: HPLIP’s supported device list is <em>wrong</em>. Contrary to what it claims, the HP LaserJet M227fdn <em>does</em> require the (proprietary) plugin pack: the scanner won’t work without it. What’s worse, the project has known about this exact error <a href="https://bugs.launchpad.net/hplip/+bug/1727056">since October 2017</a>, and as of this writing – over a year and two months later – they still haven’t fixed the list. When I examined the HPLIP source code to figure out which model to try next, I finally understood why ThinkPenguin didn’t have any FOSS-friendly multifunction laser printers in their catalog: they actually <em>don’t exist.</em></p>
+<p>With this state of affairs – strange and surprising gaps in FOSS driver support, bad information from even the most authoritative sources – ThinkPenguin’s purpose becomes clear. They are the leading <em>curators</em> of FOSS-friendly hardware that you can actually buy. They’ve already done the error-prone work of finding supported hardware, and their catalog is the output of that work. Any gaps in that catalog probably correspond to actual gaps in driver coverage.</p>
+<p>In our case, we settled for a multifunction inkjet: an <a href="https://www.thinkpenguin.com/gnu-linux/hp-officejet-pro-all-one-printer-tpe-hpofjt8710">HP OfficeJet 8710</a>. HPLIP contains fully free drivers for both printer and scanner. Print quality is not as good as we’d like, but media costs and print speeds are better than I’d feared. I was used to really slow, really cheap inkjets with disposable printheads, whereas the 8710 is a decently fast ink-tank printer with a separate, reusable printhead.</p>
+<p>Hope that helps someone.</p>
+
+        </div>
+    </body>
+</html>

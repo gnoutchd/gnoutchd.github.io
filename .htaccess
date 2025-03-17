@@ -1,0 +1,5 @@
+AddCharset utf-8 .html
+AddCharset utf-8 .xhtml
+
+AddType video/ogg .ogv
+AddType application/x-bzip-compressed-tar .tar.bz2

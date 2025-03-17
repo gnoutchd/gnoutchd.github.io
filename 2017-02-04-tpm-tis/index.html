@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Daniel Gnoutcheff’s webspace - tpm_tis hangs and BUGs on Thinkpad R61</title>
+        <link rel="stylesheet" href="../css/default.css" />
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">Daniel Gnoutcheff’s webspace</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+                <a href="../archive/">Archive</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1>tpm_tis hangs and BUGs on Thinkpad R61</h1>
+            <div class="info">
+    Posted on February  4, 2017
+    
+</div>
+
+<p>My main personal laptop is a Thinkpad R61 running Debian stretch (in testing as of this writing). A few weeks ago, I stumbled upon several regressions after an <code>apt dist-upgrade</code>:</p>
+<ul>
+<li>My machine would no longer power off properly (it started hanging at the end of the shutdown sequence)</li>
+<li>Suspend-to-RAM stopped working (hanging at suspend time), and</li>
+<li>A kernel BUG + stacktrace appeared at boot time.</li>
+</ul>
+<p>The stracktrace in question, from <code>dmesg</code>:</p>
+<pre><code>[   30.148332] BUG: stack guard page was hit at ffffa7ae80b3c000 (stack is ffffa7ae80b38000..ffffa7ae80b3bfff)
+[   30.148686] kernel stack overflow (page fault): 0000 [#1] SMP
+[   30.148762] Modules linked in: tpm_tis(+) tpm_tis_core tpm parport_pc ppdev lp parport ip_tables x_tables autofs4 ext4 crc16 jbd2 crc32c_generic fscrypto ecb lrw glue_helper ablk_helper cryptd aes_x86_64 mbcache xts gf128mul algif_skcipher af_alg dm_crypt dm_mod sr_mod cdrom sd_mod ata_generic psmouse i2c_i801 i2c_smbus ahci libahci ata_piix libata scsi_mod sdhci_pci sdhci mmc_core firewire_ohci firewire_core crc_itu_t fjes ehci_pci uhci_hcd thermal ehci_hcd e1000e usbcore ptp pps_core usb_common
+[   30.152190] CPU: 0 PID: 361 Comm: systemd-udevd Not tainted 4.9.0-1-amd64 #1 Debian 4.9.2-2
+[   30.152277] Hardware name: LENOVO 7733A82/7733A82, BIOS 7LETD0WW (2.30 ) 02/27/2012
+[   30.152314] task: ffff95443101c380 task.stack: ffffa7ae80b38000
+[   30.152314] RIP: 0010:[&lt;ffffffffc062a10a&gt;]  [&lt;ffffffffc062a10a&gt;] tpm_tcg_write_bytes+0x2a/0x50 [tpm_tis]
+[   30.152314] RSP: 0018:ffffa7ae80b3b798  EFLAGS: 00010282
+[   30.152314] RAX: 000000000000ffef RBX: ffffa7ae80b3c001 RCX: ffffa7ae80b3b93f
+[   30.152314] RDX: ffffa7ae808a8024 RSI: 0000000000000024 RDI: 0000000000000000
+[   30.152314] RBP: 0000000000000024 R08: 0000000700e90014 R09: 0000000000000000
+[   30.152314] R10: 0000000000000000 R11: ffff954436416ec0 R12: ffffa7ae80b4b92f
+[   30.152314] R13: ffff954435cd7898 R14: ffffa7ae80b3b93e R15: 00000000fffffff0
+[   30.152314] FS:  00007ffb3cf1f8c0(0000) GS:ffff95443bc00000(0000) knlGS:0000000000000000
+[   30.152314] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[   30.152314] CR2: ffffa7ae80b3c000 CR3: 000000013078e000 CR4: 00000000000006f0
+[   30.152314] Stack:
+[   30.152314]  0000000000000001 ffff954431e2d800 ffff954435cd7898 0000000000000000
+[   30.152314]  ffffffffc0630d07 0000000000000015 00000015c061e143 ffff954435cd78b0
+[   30.152314]  c8ff40ffc062a163 0000000070d2b43c ffff954431e2d800 ffff954431e2d800
+[   30.152314] Call Trace:
+[   30.152314]  [&lt;ffffffffc0630d07&gt;] ? tpm_tis_send_data+0xd7/0x2b0 [tpm_tis_core]
+[   30.152314]  [&lt;ffffffffc0630f16&gt;] ? tpm_tis_send_main+0x36/0x120 [tpm_tis_core]
+[   30.152314]  [&lt;ffffffffc0631040&gt;] ? tpm_tis_send+0x40/0x120 [tpm_tis_core]
+[   30.152314]  [&lt;ffffffffc061e420&gt;] ? tpm_transmit+0x70/0x250 [tpm]
+[   30.152314]  [&lt;ffffffffc061e61a&gt;] ? tpm_transmit_cmd+0x1a/0x60 [tpm]
+[   30.152314]  [&lt;ffffffffc061ee78&gt;] ? tpm_get_timeouts.part.1+0x1a8/0x3a0 [tpm]
+[   30.152314]  [&lt;ffffffff84c686a6&gt;] ? dev_vprintk_emit+0xb6/0x230
+[   30.152314]  [&lt;ffffffff84c6886e&gt;] ? dev_printk_emit+0x4e/0x70
+[   30.152314]  [&lt;ffffffffc06206f9&gt;] ? tpm2_probe+0x69/0xa0 [tpm]
+[   30.152314]  [&lt;ffffffff84c690dc&gt;] ? _dev_info+0x6c/0x90
+[   30.152314]  [&lt;ffffffffc06313f3&gt;] ? tpm_tis_core_init+0x2d3/0xee0 [tpm_tis_core]
+[   30.152314]  [&lt;ffffffffc062a520&gt;] ? tpm_tis_plat_probe+0x100/0x100 [tpm_tis]
+[   30.152314]  [&lt;ffffffffc062a5f7&gt;] ? tpm_tis_pnp_init+0xd7/0x195 [tpm_tis]
+[   30.152314]  [&lt;ffffffff84bf08ec&gt;] ? pnp_device_probe+0x5c/0xc0
+[   30.152314]  [&lt;ffffffff84c6ce0a&gt;] ? driver_probe_device+0x21a/0x420
+[   30.152314]  [&lt;ffffffff84c6d0ea&gt;] ? __driver_attach+0xda/0xe0
+[   30.152314]  [&lt;ffffffff84c6d010&gt;] ? driver_probe_device+0x420/0x420
+[   30.152314]  [&lt;ffffffff84c6a997&gt;] ? bus_for_each_dev+0x67/0xb0
+[   30.152314]  [&lt;ffffffff84c6c04a&gt;] ? bus_add_driver+0x16a/0x260
+[   30.152314]  [&lt;ffffffffc0636000&gt;] ? 0xffffffffc0636000
+[   30.152314]  [&lt;ffffffff84c6d987&gt;] ? driver_register+0x57/0xc0
+[   30.152314]  [&lt;ffffffffc0636000&gt;] ? 0xffffffffc0636000
+[   30.152314]  [&lt;ffffffffc06360a0&gt;] ? init_tis+0xa0/0x1000 [tpm_tis]
+[   30.152314]  [&lt;ffffffff84d2894c&gt;] ? netlink_broadcast_filtered+0x14c/0x3d0
+[   30.152314]  [&lt;ffffffff849c366d&gt;] ? vunmap_page_range+0x21d/0x370
+[   30.152314]  [&lt;ffffffff8480218b&gt;] ? do_one_initcall+0x4b/0x180
+[   30.152314]  [&lt;ffffffff849c44bd&gt;] ? __vunmap+0x6d/0xc0
+[   30.152314]  [&lt;ffffffff8497ac1c&gt;] ? do_init_module+0x5b/0x1ed
+[   30.152314]  [&lt;ffffffff84900253&gt;] ? load_module+0x2523/0x2a00
+[   30.152314]  [&lt;ffffffff848fca90&gt;] ? __symbol_put+0x60/0x60
+[   30.152314]  [&lt;ffffffff84900976&gt;] ? SYSC_finit_module+0xc6/0xf0
+[   30.152314]  [&lt;ffffffff84803b1c&gt;] ? do_syscall_64+0x7c/0xf0
+[   30.152314]  [&lt;ffffffff84df9cef&gt;] ? entry_SYSCALL64_slow_path+0x25/0x25
+[   30.152314] Code: 90 66 66 66 66 90 8d 42 ff 66 85 d2 41 55 41 54 55 0f b7 c0 53 4c 8d 64 01 01 74 21 49 89 fd 48 89 cb 89 f5 48 83 c3 01 48 89 ee &lt;0f&gt; b6 7b ff 49 03 75 50 e8 09 95 51 c4 49 39 dc 75 e7 5b 31 c0 
+[   30.152314] RIP  [&lt;ffffffffc062a10a&gt;] tpm_tcg_write_bytes+0x2a/0x50 [tpm_tis]
+[   30.152314]  RSP &lt;ffffa7ae80b3b798&gt;
+[   30.152314] ---[ end trace 2f1a84c554bb5fa8 ]---</code></pre>
+<p>Zdenek Kabelac stumbled upon a similar BUG on the Thinkpad T61 (which is almost exactly the same as the R61) and <a href="https://marc.info/?l=linux-kernel&amp;m=147729944922524">reported it to LKML</a>.</p>
+<p>In the meantime, blacklisting the <code>tpm_tis</code> kernel module “fixes” these regressions.</p>
+<pre><code># /etc/modprobe.d/tpm_tis.conf
+# As of 2017-02-04, this is Oopsing.
+# Previously reported at https://marc.info/?l=linux-kernel&amp;m=147729944922524
+blacklist tpm_tis</code></pre>
+<p>HTH!</p>
+
+        </div>
+    </body>
+</html>
